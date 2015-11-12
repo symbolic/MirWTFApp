@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">WTF‽ (The MirOS Project)</string>
+    <string name="app_credits" >App © 2015 Dominik George &lt;nik@naturalnet.de&gt;</string>
     <string name="action_update">Update</string>
+    <string name="action_about">About…</string>
 </resources>

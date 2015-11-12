@@ -20,6 +20,7 @@
 
 package de.naturalnet.mirwtfapp;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,6 +50,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Scanner;
 
 /**
  * Main activity of the WTF app
@@ -259,6 +261,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // "Update" item - run downlaod task
             wtfDownloadTask = new WTFDownloadTask(MainActivity.this);
             wtfDownloadTask.execute();
+        } else if (id == R.id.action_about) {
+            // Get number of acronyms
+            int count = 0;
+            File db = new File("/sdcard/acronyms.db");
+            try {
+                Scanner in = new Scanner(db);
+
+                // FIXME This is too slow
+                while (in.hasNextLine()) {
+                    in.nextLine();
+                    count++;
+                }
+            } catch (IOException e) {
+                // Ignore, number of acronyms is not crucial
+            }
+
+            // Show about dialog
+            View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            // FIXME builder.setIcon(R.drawable.app_icon);
+            builder.setTitle(R.string.app_name);
+            builder.setView(messageView);
+            // Set acronyms info in about dialog
+            TextView tAcronyms = (TextView) messageView.findViewById(R.id.tAcronyms);
+            tAcronyms.setText("WTF knows about " + count + " acronyms.");
+            builder.create();
+            builder.show();
         }
 
         return super.onOptionsItemSelected(item);
