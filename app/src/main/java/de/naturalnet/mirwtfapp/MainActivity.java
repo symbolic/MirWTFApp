@@ -228,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Check for existence of acronyms file and downlaod if it does not exist
         File db = new File("/sdcard/acronyms.db");
         if (!db.exists()) {
+            wtfDownloadTask = new WTFDownloadTask(MainActivity.this);
             wtfDownloadTask.execute();
         }
     }
