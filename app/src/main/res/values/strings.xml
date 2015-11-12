@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">WTF‽ (The MirOS Project)</string>
-    <string name="app_credits" >App © 2015 Dominik George &lt;nik@naturalnet.de&gt;</string>
+    <string name="app_credits" >App © 2015 Dominik George &lt;nik@naturalnet.de&gt;; published under The MirOS License.</string>
     <string name="action_update">Update</string>
     <string name="action_about">About…</string>
+    <string name="acronyms_source">Source: https://www.mirbsd.org/acronyms, courtesy of mirabilos &lt;tg@mirbsd.org&gt;</string>
 </resources>
