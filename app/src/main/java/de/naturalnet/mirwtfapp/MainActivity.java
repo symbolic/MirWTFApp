@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ProgressDialog mProgressDialog;
 
     // Instance of download task inner class
-    final WTFDownloadTask wtfDownloadTask = new WTFDownloadTask(MainActivity.this);
+    private WTFDownloadTask wtfDownloadTask;
 
     // UI elements
     private Button bSearch;
@@ -257,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Find out what menu entry was clicked
         if (id == R.id.action_update) {
             // "Update" item - run downlaod task
+            wtfDownloadTask = new WTFDownloadTask(MainActivity.this);
             wtfDownloadTask.execute();
         }
 
