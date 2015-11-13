@@ -38,8 +38,10 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,6 +56,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -197,10 +200,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // UI elements
     private Button bSearch;
-    private TextView tResults;
+    private ListView lResults;
     private TextView tHeading;
     private EditText eAcronym;
     private TextView tCats;
+
+    // Result list stuff
+    ArrayList<String> results;
+    ArrayAdapter<String> resultsAdapter;
 
     // Counter for eastercat
     private int cats = 0;
@@ -231,13 +238,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bSearch.setOnClickListener(this);
 
         // Find text UI elements
-        tResults = (TextView) findViewById(R.id.tResults);
+        lResults = (ListView) findViewById(R.id.lResults);
         tHeading = (TextView) findViewById(R.id.tHeading);
         eAcronym = (EditText) findViewById(R.id.eAcronym);
         tCats = (TextView) findViewById(R.id.tCats);
 
         // Focus text field on start
         eAcronym.requestFocus();
+
+        // Initalise results list
+        results = new ArrayList<String>();
+        resultsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, results);
+        lResults.setAdapter(resultsAdapter);
 
         // Set up listener for Enter key in text field
         TextView.OnEditorActionListener acronymEnterListener = new TextView.OnEditorActionListener(){
@@ -358,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         // Empty result textbox
-        tResults.setText("");
+        resultsAdapter.clear();
 
         // Open acronyms.db and initialise reader
         File db = new File("/sdcard/acronyms.db");
@@ -366,17 +378,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Read fiel line by line
         String line;
+        Boolean found = false;
         while ((line = r.readLine()) != null) {
             // Compare beginning of line with entered acronym followed by tab
             if (line.startsWith(acronym + "\t")) {
                 // Append rest of line to result textbox if found
-                tResults.append(line.substring(acronym.length() + 1) + "\n");
+                resultsAdapter.add(line.substring(acronym.length() + 1));
+                found = true;
             }
         }
 
         // show telling message if nothing was found
-        if (tResults.getText().length() == 0) {
-            tResults.setText("Gee, I don’t know…");
+        if (! found) {
+            resultsAdapter.add("Gee, I don’t know…");
         }
 
         // Set headline
