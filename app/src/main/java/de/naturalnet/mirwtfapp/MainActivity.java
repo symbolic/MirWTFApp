@@ -200,6 +200,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tResults;
     private TextView tHeading;
     private EditText eAcronym;
+    private TextView tCats;
+
+    // Counter for eastercat
+    private int cats = 0;
 
     /**
      * Run when activity is called
@@ -230,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tResults = (TextView) findViewById(R.id.tResults);
         tHeading = (TextView) findViewById(R.id.tHeading);
         eAcronym = (EditText) findViewById(R.id.eAcronym);
+        tCats = (TextView) findViewById(R.id.tCats);
 
         // Focus text field on start
         eAcronym.requestFocus();
@@ -330,6 +335,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String acronym = eAcronym.getText().toString().toUpperCase();
         if (acronym.matches(".*[A-Z]\\..*")) {
             acronym = acronym.replace(".", "");
+        }
+
+        if (cats < 3) {
+            // Increase cat counter if MIAU
+            if (acronym.equals("MIAU")) cats++;
+            tCats.append("\uD83D\uDE38");
+
+            // Cat content if enough MIAU
+            if (cats == 3) {
+                View catView = getLayoutInflater().inflate(R.layout.dialog_eastercat, null, false);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.miau);
+                builder.setView(catView);
+                builder.create();
+                builder.show();
+            }
         }
 
         // Empty result textbox
