@@ -327,6 +327,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 tResults.append(line.substring(acronym.length() + 1) + "\n");
             }
         }
+
+        // show telling message if nothing was found
+        if (tResults.getText().length() == 0) {
+            tResults.setText("Gee, I don’t know…");
+        }
     }
 
     /**
