@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // Show about dialog
             View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            // FIXME builder.setIcon(R.drawable.app_icon);
+            builder.setIcon(R.mipmap.ic_launcher);
             builder.setTitle(R.string.app_name);
             builder.setView(messageView);
             // Set acronyms info in about dialog
