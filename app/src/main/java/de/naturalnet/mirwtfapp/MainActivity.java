@@ -318,6 +318,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // Set acronyms info in about dialog
             TextView tAcronyms = (TextView) messageView.findViewById(R.id.tAcronyms);
             tAcronyms.setText("WTF knows about " + count + " acronyms.");
+            if (cats >= 3) {
+                TextView tAcronymsSource = (TextView) messageView.findViewById(R.id.tAcronymsSource);
+                tAcronymsSource.append("\n\nCat content © 2015 Dominik George, CC-BY-SA 3.0+.");
+            }
             builder.create();
             builder.show();
         }
