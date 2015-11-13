@@ -3,6 +3,6 @@
     <string name="app_credits" >App © 2015 Dominik George &lt;nik@naturalnet.de&gt;; published under The MirOS License.</string>
     <string name="action_update">Update</string>
     <string name="action_about">About…</string>
-    <string name="acronyms_source">Source: https://www.mirbsd.org/acronyms, courtesy of mirabilos &lt;tg@mirbsd.org&gt;</string>
+    <string name="acronyms_source">Source: https://www.mirbsd.org/wtf.htm, courtesy of mirabilos &lt;m@mirbsd.org&gt;</string>
     <string name="miau">Miau!</string>
 </resources>
