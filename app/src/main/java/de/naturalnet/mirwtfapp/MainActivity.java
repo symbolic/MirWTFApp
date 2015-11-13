@@ -300,8 +300,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @throws IOException if acronyms.db could not be read
      */
     private void doWTFSearch() throws IOException {
-        // Upper case form of the entered acronym
+        // Normalise input
         String acronym = eAcronym.getText().toString().toUpperCase();
+        if (acronym.matches(".*[A-Z]\\..*")) {
+            acronym = acronym.replace(".", "");
+        }
 
         // Empty result textbox
         tResults.setText("");
