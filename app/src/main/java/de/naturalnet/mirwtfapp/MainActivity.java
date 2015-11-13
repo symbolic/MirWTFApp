@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // UI elements
     private Button bSearch;
     private TextView tResults;
+    private TextView tHeading;
     private EditText eAcronym;
 
     /**
@@ -225,6 +226,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Find text UI elements
         tResults = (TextView) findViewById(R.id.tResults);
+        tHeading = (TextView) findViewById(R.id.tHeading);
         eAcronym = (EditText) findViewById(R.id.eAcronym);
 
         // Focus text field on start
@@ -332,6 +334,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (tResults.getText().length() == 0) {
             tResults.setText("Gee, I don’t know…");
         }
+
+        // Set headline
+        tHeading.setText(acronym + " means…");
     }
 
     /**
@@ -346,8 +351,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 // Do acronyms search
                 doWTFSearch();
-                // Remove focus from text field
+                // Remove focus from text field and empty it
                 eAcronym.clearFocus();
+                eAcronym.setText("");
                 // hide virtual keyboard
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(eAcronym.getWindowToken(), 0);
