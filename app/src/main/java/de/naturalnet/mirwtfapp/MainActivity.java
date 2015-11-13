@@ -34,6 +34,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -225,6 +227,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tResults = (TextView) findViewById(R.id.tResults);
         eAcronym = (EditText) findViewById(R.id.eAcronym);
 
+        // Focus text field on start
+        eAcronym.requestFocus();
+
         // Check for existence of acronyms file and downlaod if it does not exist
         File db = new File("/sdcard/acronyms.db");
         if (!db.exists()) {
@@ -336,6 +341,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 // Do acronyms search
                 doWTFSearch();
+                // Remove focus from text field
+                eAcronym.clearFocus();
+                // hide virtual keyboard
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(eAcronym.getWindowToken(), 0);
             } catch (Exception e) {
                 // Show toast with error if acronyms.db could not be searched
                 Toast.makeText(this, "Error searching acronyms.db", Toast.LENGTH_LONG).show();
