@@ -24,6 +24,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -117,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 byte data[] = new byte[4096];
                 long total = 0;
                 int count;
+                int count_acronyms = 0;
                 while ((count = input.read(data)) != -1) {
                     // allow canceling with back button
                     if (isCancelled()) {
@@ -128,7 +130,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (fileLength > 0) // only if total length is known
                         publishProgress((int) (total * 100 / fileLength));
                     output.write(data, 0, count);
+                    for (int i = 0; i < data.length; i++) {
+                        if (data[i] == '\n') {
+                            count_acronyms++;
+                        }
+                    }
                 }
+
+                // Store acronyms count
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putInt("acronyms_count", count_acronyms);
+                editor.commit();
             } catch (Exception e) {
                 // Return any exception to the user
                 return e.toString();
@@ -209,6 +221,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<String> results;
     ArrayAdapter<String> resultsAdapter;
 
+    // Storage for primitive data
+    SharedPreferences prefs;
+
     // Counter for eastercat
     private int cats = 0;
 
@@ -250,6 +265,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         results = new ArrayList<String>();
         resultsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, results);
         lResults.setAdapter(resultsAdapter);
+
+        // Set up preferences store
+        prefs = this.getPreferences(MODE_PRIVATE);
 
         // Set up listener for Enter key in text field
         TextView.OnEditorActionListener acronymEnterListener = new TextView.OnEditorActionListener(){
@@ -306,21 +324,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             wtfDownloadTask = new WTFDownloadTask(MainActivity.this);
             wtfDownloadTask.execute();
         } else if (id == R.id.action_about) {
-            // Get number of acronyms
-            int count = 0;
-            File db = new File("/sdcard/acronyms.db");
-            try {
-                Scanner in = new Scanner(db);
-
-                // FIXME This is too slow
-                while (in.hasNextLine()) {
-                    in.nextLine();
-                    count++;
-                }
-            } catch (IOException e) {
-                // Ignore, number of acronyms is not crucial
-            }
-
             // Show about dialog
             View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -329,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             builder.setView(messageView);
             // Set acronyms info in about dialog
             TextView tAcronyms = (TextView) messageView.findViewById(R.id.tAcronyms);
-            tAcronyms.setText("WTF knows about " + count + " acronyms.");
+            tAcronyms.setText("WTF knows about " + prefs.getInt("acronyms_count", 0) + " acronyms.");
             if (cats >= 3) {
                 TextView tAcronymsSource = (TextView) messageView.findViewById(R.id.tAcronymsSource);
                 tAcronymsSource.append("\n\nCat content © 2015 Dominik George, CC-BY-SA 3.0+.");
