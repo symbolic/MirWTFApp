@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         protected void onPostExecute(String result) {
             mWakeLock.release();
             mProgressDialog.dismiss();
-            Toast.makeText(context, "Download error: " + result, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, result, Toast.LENGTH_LONG).show();
         }
     }
 
