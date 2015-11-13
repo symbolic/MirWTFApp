@@ -31,10 +31,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -232,6 +234,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Focus text field on start
         eAcronym.requestFocus();
 
+        // Set up listener for Enter key in text field
+        TextView.OnEditorActionListener acronymEnterListener = new TextView.OnEditorActionListener(){
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    try {
+                        // Do acronyms search
+                        doWTFSearch();
+                    } catch (Exception e) {
+                        // Show toast with error if acronyms.db could not be searched
+                        Toast.makeText(MainActivity.this, "Error searching acronyms.db", Toast.LENGTH_LONG).show();
+                    }
+                }
+                return true;
+            }
+        };
+        eAcronym.setOnEditorActionListener(acronymEnterListener);
+
         // Check for existence of acronyms file and downlaod if it does not exist
         File db = new File("/sdcard/acronyms.db");
         if (!db.exists()) {
@@ -337,6 +356,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Set headline
         tHeading.setText(acronym + " means…");
+
+        // Remove focus from text field and empty it
+        eAcronym.clearFocus();
+        eAcronym.setText("");
+
+        // hide virtual keyboard
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(eAcronym.getWindowToken(), 0);
     }
 
     /**
@@ -351,12 +378,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 // Do acronyms search
                 doWTFSearch();
-                // Remove focus from text field and empty it
-                eAcronym.clearFocus();
-                eAcronym.setText("");
-                // hide virtual keyboard
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(eAcronym.getWindowToken(), 0);
             } catch (Exception e) {
                 // Show toast with error if acronyms.db could not be searched
                 Toast.makeText(this, "Error searching acronyms.db", Toast.LENGTH_LONG).show();
