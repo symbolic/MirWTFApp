@@ -337,9 +337,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             acronym = acronym.replace(".", "");
         }
 
-        if (cats < 3) {
+        if (acronym.equals("MIAU") && (cats < 3)) {
             // Increase cat counter if MIAU
-            if (acronym.equals("MIAU")) cats++;
+            cats++;
             tCats.append("\uD83D\uDE38");
 
             // Cat content if enough MIAU
