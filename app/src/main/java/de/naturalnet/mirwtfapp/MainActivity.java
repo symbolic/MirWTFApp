@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -53,6 +54,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 /**
@@ -192,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button bSearch;
     private ListView lResults;
     private TextView tHeading;
-    private EditText eAcronym;
+    private AutoCompleteTextView eAcronym;
     private TextView tCats;
 
     // Result list stuff
@@ -233,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Find text UI elements
         lResults = (ListView) findViewById(R.id.lResults);
         tHeading = (TextView) findViewById(R.id.tHeading);
-        eAcronym = (EditText) findViewById(R.id.eAcronym);
+        eAcronym = (AutoCompleteTextView) findViewById(R.id.eAcronym);
         tCats = (TextView) findViewById(R.id.tCats);
 
         // Focus text field on start
@@ -268,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             wtfDownloadTask.execute();
         }
 
+        // FIXME Reload after update
         try {
             // Open acronyms.db and initialise reader
             BufferedReader r = new BufferedReader(new FileReader(db));
@@ -292,6 +295,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             Toast.makeText(this, "Error reading acronyms.db", Toast.LENGTH_LONG).show();
         }
+
+        // Link list of known acronyms to text field auto completion
+        Object[] sorted = acronyms.keySet().toArray();
+        Arrays.sort(sorted);
+        ArrayAdapter acronymKeys = new ArrayAdapter(this, android.R.layout.simple_list_item_1, sorted);
+        eAcronym.setAdapter(acronymKeys);
     }
 
     /**
