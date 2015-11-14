@@ -23,20 +23,16 @@ package de.naturalnet.mirwtfapp;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -48,8 +44,6 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -58,7 +52,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * Main activity of the WTF app
@@ -71,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     public class WTFDownloadTask extends AsyncTask<String, Integer, String> {
         private Context context;
-        private PowerManager.WakeLock mWakeLock;
 
         /**
          * Constructor for download task
@@ -112,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // Set up streams to read and write
                 input = connection.getInputStream();
-                output = new FileOutputStream("/sdcard/acronyms.db");
+                output = new FileOutputStream(getFilesDir() + "/acronyms.db");
 
                 // Set up byte array and counters for progress notification
                 byte data[] = new byte[4096];
@@ -130,8 +122,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (fileLength > 0) // only if total length is known
                         publishProgress((int) (total * 100 / fileLength));
                     output.write(data, 0, count);
-                    for (int i = 0; i < data.length; i++) {
-                        if (data[i] == '\n') {
+                    for (Byte b: data) {
+                        if (b == '\n') {
                             count_acronyms++;
                         }
                     }
@@ -165,15 +157,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         /**
-         * Run before execution to set up wake lock so download is not interrupted by system sleep
+         * Run before execution to set up progress dialog
          */
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    getClass().getName());
-            mWakeLock.acquire();
             mProgressDialog.show();
         }
 
@@ -192,13 +180,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         /**
-         * Run after execution, removes wake lock and closes progress dialog
+         * Run after execution, closes progress dialog
          *
          * @param result Result text for toast
          */
         @Override
         protected void onPostExecute(String result) {
-            mWakeLock.release();
             mProgressDialog.dismiss();
             Toast.makeText(context, result, Toast.LENGTH_LONG).show();
         }
@@ -287,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         eAcronym.setOnEditorActionListener(acronymEnterListener);
 
         // Check for existence of acronyms file and downlaod if it does not exist
-        File db = new File("/sdcard/acronyms.db");
+        File db = new File(getFilesDir() + "/acronyms.db");
         if (!db.exists()) {
             wtfDownloadTask = new WTFDownloadTask(MainActivity.this);
             wtfDownloadTask.execute();
@@ -376,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         resultsAdapter.clear();
 
         // Open acronyms.db and initialise reader
-        File db = new File("/sdcard/acronyms.db");
+        File db = new File(getFilesDir() + "/acronyms.db");
         BufferedReader r = new BufferedReader(new FileReader(db));
 
         // Read fiel line by line
