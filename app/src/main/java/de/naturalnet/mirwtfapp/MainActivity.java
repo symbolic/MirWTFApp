@@ -44,6 +44,7 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -52,6 +53,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * Main activity of the WTF app
@@ -110,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 byte data[] = new byte[4096];
                 long total = 0;
                 int count;
-                int count_acronyms = 0;
                 while ((count = input.read(data)) != -1) {
                     // allow canceling with back button
                     if (isCancelled()) {
@@ -122,17 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (fileLength > 0) // only if total length is known
                         publishProgress((int) (total * 100 / fileLength));
                     output.write(data, 0, count);
-                    for (Byte b: data) {
-                        if (b == '\n') {
-                            count_acronyms++;
-                        }
-                    }
                 }
-
-                // Store acronyms count
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putInt("acronyms_count", count_acronyms);
-                editor.commit();
             } catch (Exception e) {
                 // Return any exception to the user
                 return e.toString();
@@ -208,8 +199,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<String> results;
     ArrayAdapter<String> resultsAdapter;
 
-    // Storage for primitive data
-    SharedPreferences prefs;
+    // Data hashtable
+    Hashtable<String, ArrayList<String>> acronyms;
 
     // Counter for eastercat
     private int cats = 0;
@@ -253,9 +244,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         resultsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, results);
         lResults.setAdapter(resultsAdapter);
 
-        // Set up preferences store
-        prefs = this.getPreferences(MODE_PRIVATE);
-
         // Set up listener for Enter key in text field
         TextView.OnEditorActionListener acronymEnterListener = new TextView.OnEditorActionListener(){
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -278,6 +266,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!db.exists()) {
             wtfDownloadTask = new WTFDownloadTask(MainActivity.this);
             wtfDownloadTask.execute();
+        }
+
+        try {
+            // Open acronyms.db and initialise reader
+            BufferedReader r = new BufferedReader(new FileReader(db));
+
+            // Read file line by line into Hashtable
+            String line;
+            String[] lineData;
+            acronyms = new Hashtable<String, ArrayList<String>>();
+            while ((line = r.readLine()) != null) {
+                // Check whether line is in acronym entry format
+                if (line.contains("\t")) {
+                    // Split on TAB
+                    lineData = line.split("\t");
+
+                    // Insert into Hashtable if not existent
+                    if (!acronyms.containsKey(lineData[0])) {
+                        acronyms.put(lineData[0], new ArrayList<String>());
+                    }
+                    acronyms.get(lineData[0]).add(lineData[1]);
+                }
+            }
+        } catch (IOException e) {
+            Toast.makeText(this, "Error reading acronyms.db", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -319,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             builder.setView(messageView);
             // Set acronyms info in about dialog
             TextView tAcronyms = (TextView) messageView.findViewById(R.id.tAcronyms);
-            tAcronyms.setText("WTF knows about " + prefs.getInt("acronyms_count", 0) + " acronyms.");
+            tAcronyms.setText("WTF knows about " + acronyms.size() + " acronyms.");
             if (cats >= 3) {
                 TextView tAcronymsSource = (TextView) messageView.findViewById(R.id.tAcronymsSource);
                 tAcronymsSource.append("\n\nCat content © 2015 Dominik George, CC-BY-SA 3.0+.");
@@ -362,24 +375,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Empty result textbox
         resultsAdapter.clear();
 
-        // Open acronyms.db and initialise reader
-        File db = new File(getFilesDir() + "/acronyms.db");
-        BufferedReader r = new BufferedReader(new FileReader(db));
-
-        // Read fiel line by line
-        String line;
-        Boolean found = false;
-        while ((line = r.readLine()) != null) {
-            // Compare beginning of line with entered acronym followed by tab
-            if (line.startsWith(acronym + "\t")) {
-                // Append rest of line to result textbox if found
-                resultsAdapter.add(line.substring(acronym.length() + 1));
-                found = true;
+        // Look up in hash table
+        if (acronyms.containsKey(acronym)) {
+            // Append all the entries to the result view
+            // This could be optimised, but sticking to this in order to keep API level low
+            for (String entry: acronyms.get(acronym)) {
+                resultsAdapter.add(entry);
             }
-        }
-
-        // show telling message if nothing was found
-        if (! found) {
+        } else {
             resultsAdapter.add("Gee, I don’t know…");
         }
 
