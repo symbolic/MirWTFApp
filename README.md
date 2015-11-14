@@ -1,5 +1,5 @@
 # WTF‽ (The MirOS Project)
-Offline-capable Android frontend for The MirOS Project's WTF acronym search
+Offline-capable Android frontend for The MirOS Project’s WTF acronym search
 
 This is an Android frontend to the `wtf` command as included in The MirOS Project (more precisely the acronyms database thereof).
 
