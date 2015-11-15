@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -261,6 +262,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
         eAcronym.setOnEditorActionListener(acronymEnterListener);
+
+        // Auto search on tap in auto-complete list
+        // FIXME deduplicate with above listener
+        eAcronym.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    // Do acronyms search
+                    doWTFSearch();
+                } catch (Exception e) {
+                    // Show toast with error if acronyms.db could not be searched
+                    Toast.makeText(MainActivity.this, "Error searching acronyms.db", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         // Check for existence of acronyms file and downlaod if it does not exist
         File db = new File(getFilesDir() + "/acronyms.db");
