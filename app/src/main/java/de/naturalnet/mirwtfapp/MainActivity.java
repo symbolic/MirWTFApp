@@ -177,6 +177,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         protected void onPostExecute(String result) {
             mProgressDialog.dismiss();
             Toast.makeText(context, result, Toast.LENGTH_LONG).show();
+
+            // Relaod acronyms after downloading
+            MainActivity.this.loadAcronymsDb();
         }
     }
 
@@ -261,42 +264,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Check for existence of acronyms file and downlaod if it does not exist
         File db = new File(getFilesDir() + "/acronyms.db");
-        if (!db.exists()) {
+        if (db.exists()) {
+            loadAcronymsDb();
+        } else {
             wtfDownloadTask = new WTFDownloadTask(MainActivity.this);
             wtfDownloadTask.execute();
         }
-
-        // FIXME Reload after update
-        try {
-            // Open acronyms.db and initialise reader
-            BufferedReader r = new BufferedReader(new FileReader(db));
-
-            // Read file line by line into Hashtable
-            String line;
-            String[] lineData;
-            acronyms = new Hashtable<String, ArrayList<String>>();
-            while ((line = r.readLine()) != null) {
-                // Check whether line is in acronym entry format
-                if (line.contains("\t")) {
-                    // Split on TAB
-                    lineData = line.split("\t");
-
-                    // Insert into Hashtable if not existent
-                    if (!acronyms.containsKey(lineData[0])) {
-                        acronyms.put(lineData[0], new ArrayList<String>());
-                    }
-                    acronyms.get(lineData[0]).add(lineData[1]);
-                }
-            }
-        } catch (IOException e) {
-            Toast.makeText(this, "Error reading acronyms.db", Toast.LENGTH_LONG).show();
-        }
-
-        // Link list of known acronyms to text field auto completion
-        Object[] sorted = acronyms.keySet().toArray();
-        Arrays.sort(sorted);
-        ArrayAdapter acronymKeys = new ArrayAdapter(this, android.R.layout.simple_list_item_1, sorted);
-        eAcronym.setAdapter(acronymKeys);
     }
 
     /**
@@ -401,6 +374,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // hide virtual keyboard
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(eAcronym.getWindowToken(), 0);
+    }
+
+    /**
+     * Load acronyms database into Hashtable
+     */
+    public void loadAcronymsDb() {
+        try {
+            // Open acronyms.db and initialise reader
+            File db = new File(getFilesDir() + "/acronyms.db");
+            BufferedReader r = new BufferedReader(new FileReader(db));
+
+            // Read file line by line into Hashtable
+            String line;
+            String[] lineData;
+            acronyms = new Hashtable<String, ArrayList<String>>();
+            while ((line = r.readLine()) != null) {
+                // Check whether line is in acronym entry format
+                if (line.contains("\t")) {
+                    // Split on TAB
+                    lineData = line.split("\t");
+
+                    // Insert into Hashtable if not existent
+                    if (!acronyms.containsKey(lineData[0])) {
+                        acronyms.put(lineData[0], new ArrayList<String>());
+                    }
+                    acronyms.get(lineData[0]).add(lineData[1]);
+                }
+            }
+        } catch (IOException e) {
+            Toast.makeText(this, "Error reading acronyms.db", Toast.LENGTH_LONG).show();
+        }
+
+        // Link list of known acronyms to text field auto completion
+        Object[] sorted = acronyms.keySet().toArray();
+        Arrays.sort(sorted);
+        ArrayAdapter acronymKeys = new ArrayAdapter(this, android.R.layout.simple_list_item_1, sorted);
+        eAcronym.setAdapter(acronymKeys);
     }
 
     /**
