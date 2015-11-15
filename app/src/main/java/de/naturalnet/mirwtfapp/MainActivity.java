@@ -53,6 +53,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Locale;
 
 /**
  * Main activity of the WTF app
@@ -201,8 +202,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<String> results;
     ArrayAdapter<String> resultsAdapter;
 
-    // Data hashtable
+    // Data hashtables
     Hashtable<String, ArrayList<String>> acronyms;
+    Hashtable<String, String> uppercasables;
 
     // Counter for eastercat
     private int cats = 0;
@@ -339,16 +341,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
+     * Normalise acronym and return result
+     *
+     * @param acronym the input acronym
+     * @return the normalised acronym
+     */
+    public String normaliseAcronym(String acronym) {
+        // Upper case A-Z first
+        acronym = acronym.toUpperCase(Locale.ENGLISH);
+
+        // Upper case with limited matching rules loaded from acronyms.db
+        for (String original: uppercasables.keySet()) {
+            acronym = acronym.replace(original, uppercasables.get(original));
+        }
+
+        // Remove dots if acronym contains letter followed by dot
+        if (acronym.matches(".*[A-Z]\\..*")) {
+            acronym = acronym.replace(".", "");
+        }
+
+        return acronym;
+    }
+
+    /**
      * Method called to do an actual search on acronyms
      *
      * @throws IOException if acronyms.db could not be read
      */
     private void doWTFSearch() throws IOException {
         // Normalise input
-        String acronym = eAcronym.getText().toString().toUpperCase();
-        if (acronym.matches(".*[A-Z]\\..*")) {
-            acronym = acronym.replace(".", "");
-        }
+        String acronym = normaliseAcronym(eAcronym.getText().toString());
 
         if ((acronym.equals("MIAU") || acronym.equals("MEOW")) && (cats < 3)) {
             // Increase cat counter if MIAU
@@ -396,6 +418,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Load acronyms database into Hashtable
      */
     public void loadAcronymsDb() {
+        // Empty Hashtables
+        if (acronyms == null) {
+            acronyms = new Hashtable<String, ArrayList<String>>();
+        } else {
+            acronyms.clear();
+        }
+        if (uppercasables == null) {
+            uppercasables = new Hashtable<String, String>();
+        } else {
+            uppercasables.clear();
+        }
+
         try {
             // Open acronyms.db and initialise reader
             File db = new File(getFilesDir() + "/acronyms.db");
@@ -404,9 +438,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // Read file line by line into Hashtable
             String line;
             String[] lineData;
-            acronyms = new Hashtable<String, ArrayList<String>>();
             while ((line = r.readLine()) != null) {
-                // Check whether line is in acronym entry format
+                // Check whether line is in acronym entry format…
                 if (line.contains("\t")) {
                     // Split on TAB
                     lineData = line.split("\t");
@@ -416,6 +449,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         acronyms.put(lineData[0], new ArrayList<String>());
                     }
                     acronyms.get(lineData[0]).add(lineData[1]);
+                // …or in uppercase definition line format
+                } else if (line.startsWith("  ")) {
+                    String[] pairs = line.substring(2).split(" ");
+
+                    for (String pair: pairs) {
+                        String[] kv = pair.split("/");
+                        uppercasables.put(kv[0], kv[1]);
+                    }
                 }
             }
         } catch (IOException e) {
