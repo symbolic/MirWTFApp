@@ -11,3 +11,7 @@ wtf is a standard BSD tool that can resolve acronyms on the command line. It use
 
 The acronyms database used by this app was forked and is continously extended by mirabilos, the founder of The MirOS Project.
 The MirOS BSD implementation of the tool and database, shared by this app, offers improved reliability and search key normalisation.
+
+## Donating
+
+If you like the app, consider donating Bitcoins to 1EAytSwn1u7tKTZ9sMDVCzDqe2nwVf4Pra.
