@@ -28,7 +28,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,7 +37,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -211,60 +209,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // Counter for eastercat
     private int cats = 0;
 
-    public class AcronymsAdapter extends ArrayAdapter<String> {
-        private Filter filter;
-
-        public AcronymsAdapter(Context context, int textViewResourceId, ArrayList<String> items) {
-            super(context, textViewResourceId, items);
-        }
-
-        @Override
-        public Filter getFilter() {
-            if (filter == null) {
-                filter = new AcronymsFilter();
-            }
-            return filter;
-        }
-
-        private class AcronymsFilter extends Filter {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                FilterResults res = new FilterResults();
-                String prefix = normaliseAcronym(constraint.toString());
-
-                ArrayList<String> matching = new ArrayList<String>();
-
-                for (int i = 0; i < AcronymsAdapter.this.getCount(); i++) {
-                    if (AcronymsAdapter.this.getItem(i).startsWith(prefix)) {
-                        matching.add(AcronymsAdapter.this.getItem(i));
-                    }
-                }
-
-                res.values = matching;
-                res.count = matching.size();
-
-                return res;
-            }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                ArrayList<String> items = (ArrayList<String>) results.values;
-                clear();
-                int count = items.size();
-                for (int i = 0; i < count; i++)
-                {
-                    String entry = (String) items.get(i);
-                    add(entry);
-                }
-
-                if (items.size() > 0)
-                    notifyDataSetChanged();
-                else
-                    notifyDataSetInvalidated();
-            }
-        }
-    }
-
     /**
      * Run when activity is called
      *
@@ -301,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Initalise results list
         results = new ArrayList<String>();
-        resultsAdapter = new AcronymsAdapter(this, android.R.layout.simple_list_item_1, results);
+        resultsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, results);
         lResults.setAdapter(resultsAdapter);
 
         // Set up listener for Enter key in text field
